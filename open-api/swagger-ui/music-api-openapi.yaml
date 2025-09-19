@@ -65,6 +65,10 @@ paths:
                       name: response
         '400':
           $ref: '#/components/responses/BadRequest'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         '500':
           $ref: '#/components/responses/InternalServerError'
 
@@ -87,6 +91,10 @@ paths:
             application/xml:
               schema:
                 $ref: '#/components/schemas/Band'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         '400':
           $ref: '#/components/responses/BadRequest'
         '500':
@@ -113,6 +121,8 @@ paths:
             application/xml:
               schema:
                 $ref: '#/components/schemas/Band'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
@@ -148,6 +158,10 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         '500':
           $ref: '#/components/responses/InternalServerError'
     delete:
@@ -166,12 +180,14 @@ paths:
       responses:
         '204':
           description: Группа успешно удалена
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /bands/count-by-singles/{singlesCount}:
+  /bands/singles/equally/{singlesCount}:
     get:
       tags:
         - MusicBands
@@ -197,10 +213,12 @@ paths:
                 description: Количество групп, значение поля singlesCount которых равно заданному
                 xml:
                   name: count
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /bands/count-greater-than-singles/{singlesCount}:
+  /bands/singles/greater/{singlesCount}:
     get:
       tags:
         - MusicBands
@@ -289,6 +307,10 @@ paths:
                       name: response
         '400':
           $ref: '#/components/responses/BadRequest'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         '500':
           $ref: '#/components/responses/InternalServerError'
 
@@ -313,6 +335,10 @@ paths:
           description: Участник успешно удален
         '400':
           $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         '500':
           $ref: '#/components/responses/InternalServerError'
 
@@ -337,6 +363,8 @@ paths:
           description: Сингл успешно добавлен
         '400':
           $ref: '#/components/responses/BadRequest'
+        '404':
+           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
 
@@ -350,7 +378,7 @@ components:
           type: string
           description: |
             Поля для сортировки в формате "field1,asc;field2,desc".
-            Допустимые поля: id, name, creationDate, numberOfParticipants, singlesCount, albumsCount
+            Допустимые поля для фильтрации: id, name, creationDate, numberOfParticipants, singlesCount, albumsCount
         name:
           description: Фильтр по названию группы
           type: string
@@ -583,7 +611,7 @@ components:
             $ref: '#/components/schemas/Error'
           example:
             error: "BAD_REQUEST"
-            message: "Значение поля name должно быть больше 0"
+            message: "Значение поля singlesCount должно быть больше 0"
             timestamp: "2024-01-15T10:30:00Z"
             path: "/api/bands"
 
@@ -610,6 +638,31 @@ components:
             message: "Произошла внутренняя ошибка сервера"
             timestamp: "2024-01-15T10:30:00Z"
             path: "/api/bands"
+
+    UnsupportedMediaType:
+        description: Неподдерживаемый тип данных в теле запроса
+        content:
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: "UNSUPPORTED_MEDIA_TYPE"
+              message: "Тело запроса должно быть в формате xml"
+              timestamp: "2024-01-15T10:30:00Z"
+              path: "api/bands"
+
+    UnprocessableEntity:
+        description: Данные не могут быть обработаны
+        content:
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: "UNPROCESSABLE_ENTITY"
+              message: "Время создания группы не может быть в будущем"
+              timestamp: "2024-01-15T10:30:00Z"
+              path: "api/bands"
+
 
 tags:
   - name: MusicBands
