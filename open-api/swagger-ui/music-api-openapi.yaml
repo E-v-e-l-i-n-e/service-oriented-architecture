@@ -1,0 +1,618 @@
+openapi: 3.0.3
+info:
+  title: MusicBand Collection Management API
+  description: |
+    API для управления музыкальными группами. Состоит из двух веб-сервисов:
+    1. Основной сервис управления коллекцией музыкальных групп
+    2. Дополнительный сервис /grammy для добавления сингла указанной группе и удаления участников
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api
+    description: Development server
+
+
+paths:
+  /bands/filters:
+    post:
+      tags:
+        - MusicBands
+      summary: Вывести все группы с фильтрами и сортировкой
+      description: Возвращает массив объектов, удовлетворяющих условиям поиска
+      parameters:
+        - name: page
+          in: query
+          description: Номер страницы (начиная с 1)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: size
+          in: query
+          description: Размер страницы (количество элементов)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 20
+      requestBody:
+        required: false
+        content:
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/BandSearchRequest'
+      responses:
+        '200':
+          description: Группы найдены
+          content:
+            application/xml:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginationBase'
+                  - type: object
+                    properties:
+                      bands:
+                        type: array
+                        items:
+                          allOf:
+                            - $ref: '#/components/schemas/Band'
+                            - xml:
+                                name: band
+                        xml:
+                          wrapped: true
+                    xml:
+                      name: response
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /bands:
+    post:
+      tags:
+        - MusicBands
+      summary: Создать новую группу
+      description: Добавляет новую группу в коллекцию
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/BandRequest'
+      responses:
+        '201':
+          description: Группа успешно создана
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Band'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /bands/{id}:
+    get:
+      tags:
+        - MusicBands
+      summary: Получить группу по id
+      description: Возвращает музыкальную группу с указанным id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Уникальный идентификатор группы
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Группа найдена
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Band'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags:
+        - MusicBands
+      summary: Обновить группу
+      description: Обновляет существующую группу по id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Уникальный идентификатор группы
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/BandRequest'
+      responses:
+        '200':
+          description: Группа успешно обновлена
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Band'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - MusicBands
+      summary: Удалить группу
+      description: Удаляет группу из коллекции по id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Уникальный идентификатор группы
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '204':
+          description: Группа успешно удалена
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /bands/count-by-singles/{singlesCount}:
+    get:
+      tags:
+        - MusicBands
+      summary: Рассчитать количество групп, значение поля singlesCount которых равно заданному
+      description: Возвращает количество групп, значение поля singlesCount которых равно заданному
+      parameters:
+        - name: singlesCount
+          in: path
+          required: true
+          description: Количество групп, количество синглов в которых равно заданному
+          schema:
+            type: integer
+            format: int64
+            example: 3
+      responses:
+        '200':
+          description: Количество групп успешно рассчитано
+          content:
+            application/xml:
+              schema:
+                type: integer
+                format: int64
+                description: Количество групп, значение поля singlesCount которых равно заданному
+                xml:
+                  name: count
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /bands/count-greater-than-singles/{singlesCount}:
+    get:
+      tags:
+        - MusicBands
+      summary: Рассчитать количество групп, значение поля singlesCount которых больше заданного
+      description: Возвращает количество групп, значение поля singlesCount которых больше заданного
+      parameters:
+        - name: singlesCount
+          in: path
+          required: true
+          description: Количество групп, количество синглов в которых равно заданному
+          schema:
+            type: integer
+            format: int64
+          example: 10
+      responses:
+        '200':
+          description: Количество групп успешно рассчитано
+          content:
+            application/xml:
+              schema:
+                type: integer
+                format: int64
+                description: Количество групп, значение поля singlesCount которых равно заданному
+                xml:
+                  name: count
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /bands/search-by-name:
+    post:
+      tags:
+        - MusicBands
+      summary: Найти группы содержащие заданную подстроку в названии
+      description: Возвращает массив объектов, значение поля name которых содержит заданную подстроку
+      parameters:
+        - name: page
+          in: query
+          description: Номер страницы (начиная с 1)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: size
+          in: query
+          description: Размер страницы (количество элементов)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema:
+              type: string
+              minLength: 1
+              description: Заданная подстрока
+              xml:
+                name: substring
+              example: Pilots
+      responses:
+        '200':
+          description: Группы найдены
+          content:
+            application/xml:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginationBase'
+                  - type: object
+                    properties:
+                      bands:
+                        type: array
+                        items:
+                          allOf:
+                            - $ref: '#/components/schemas/Band'
+                            - xml:
+                                name: band
+                        xml:
+                          wrapped: true
+                    xml:
+                      name: response
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+
+  /grammy/band/{band-id}/participants/remove:
+    delete:
+      tags:
+        - Grammy
+      summary: Удалить участника из группы
+      description: Удаляет участника по id группы
+
+      parameters:
+        - name: band-id
+          in: path
+          required: true
+          description: Id группы, из которой нужно удалить участника
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Участник успешно удален
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /grammy/band/{band-id}/singles/add:
+    post:
+      tags:
+        - Grammy
+      summary: Добавить новый сингл указанной группе
+      description: Добавляет новый сингл по id группы
+
+      parameters:
+        - name: band-id
+          in: path
+          required: true
+          description: Id группы, в которую нужно добавить сингл
+          schema:
+            type: integer
+            format: int64
+            example: 3
+      responses:
+        '200':
+          description: Сингл успешно добавлен
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+
+components:
+  schemas:
+    BandSearchRequest:
+      type: object
+      properties:
+        sort:
+          type: string
+          description: |
+            Поля для сортировки в формате "field1,asc;field2,desc".
+            Допустимые поля: id, name, creationDate, numberOfParticipants, singlesCount, albumsCount
+        name:
+          description: Фильтр по названию группы
+          type: string
+          example: Сектор газа
+        genre:
+          $ref: '#/components/schemas/MusicGenre'
+        numberOfParticipants:
+          type: integer
+          description: Фильтр по количеству участников группы
+          example: 3
+        singlesCount:
+          type: integer
+          format: int64
+          description: Фильтр по количеству синглов
+          example: 2
+        albumsCount:
+          type: integer
+          description: Фильтр по количеству альбомов
+          example: 1
+
+    Band:
+      type: object
+      required:
+        - id
+        - name
+        - coordinates
+        - creationDate
+        - numberOfParticipants
+        - albumsCount
+        - singlesCount
+        - musicGenre
+        - label
+
+      properties:
+        id:
+          type: integer
+          description: идентификатор группы
+          example: 1
+          minimum: 1
+
+        name:
+          type: string
+          description: Название группы
+          example: Сектор газа
+          minLength: 1
+
+        coordinates:
+          $ref: '#/components/schemas/Coordinates'
+
+        creationDate:
+          type: string
+          format: localDateTime
+          description: Время добавления группы в коллекцию
+          example: 2007-12-03T10:15:30
+
+        numberOfParticipants:
+          type: integer
+          format: int64
+          description: Количество участников
+          example: 4
+          minimum: 1
+
+        albumsCount:
+          type: integer
+          description: Количество альбомов
+          example: 12
+          minimum: 1
+
+        singlesCount:
+          type: integer
+          format: int64
+          description: Количество синглов
+          example: 2
+          minimum: 1
+
+        musicGenre:
+          $ref: '#/components/schemas/MusicGenre'
+
+        label:
+          $ref: '#/components/schemas/Label'
+
+    BandRequest:
+      type: object
+      required:
+        - name
+        - coordinates
+        - numberOfParticipants
+        - albumsCount
+        - singlesCount
+        - musicGenre
+        - label
+      properties:
+        name:
+          type: string
+          description: Название группы
+          example: Сектор газа
+          minLength: 1
+
+        coordinates:
+          $ref: '#/components/schemas/Coordinates'
+
+        numberOfParticipants:
+          type: integer
+          format: int64
+          description: Количество участников
+          example: 4
+          minimum: 1
+
+        albumsCount:
+          type: integer
+          description: Количество альбомов
+          example: 12
+          minimum: 1
+
+        singlesCount:
+          type: integer
+          format: int64
+          description: Количество синглов
+          example: 2
+          minimum: 1
+
+        musicGenre:
+          $ref: '#/components/schemas/MusicGenre'
+
+        label:
+          $ref: '#/components/schemas/Label'
+
+
+    Coordinates:
+      type: object
+      required:
+        - x
+        - y
+      properties:
+        x:
+          type: integer
+          description: Координата X
+          example: 3
+        y:
+          type: integer
+          format: int64
+          description: Координата Y
+          example: 101
+
+    Label:
+      type: object
+      required:
+        - sales
+      properties:
+        sales:
+          type: integer
+          format: int64
+          description: Количество продаж
+          minimum: 1
+          example: 100000
+
+    MusicGenre:
+      type: string
+      description: Жанр музыки
+      enum:
+        - PROGRESSIVE_ROCK
+        - HIP_HOP
+        - PUNK_ROCK
+      example: HIP_HOP
+
+    PaginationBase:
+      type: object
+      properties:
+        pagination:
+          type: object
+          properties:
+            page:
+              type: integer
+              minimum: 1
+              description: Номер текущей страницы
+            totalPages:
+              type: integer
+              minimum: 0
+              description: Общее количество страниц
+            totalCount:
+              type: integer
+              minimum: 0
+              description: Общее количество элементов
+            size:
+              type: integer
+              minimum: 1
+              description: Размер страницы
+          xml:
+            name: pagination
+
+    PaginatedResponse:
+      allOf:
+        - $ref: '#/components/schemas/PaginationBase'
+        - type: object
+          properties:
+            data:
+              type: object
+
+
+    Error:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Краткое описание ошибки
+          example: "BAD_REQUEST"
+        message:
+          type: string
+          description: Подробное сообщение об ошибке
+          example: "Поле name не может быть пустым"
+        timestamp:
+          type: string
+          format: date-time
+          description: Время возникновения ошибки
+          example: "2024-01-15T10:30:00Z"
+        path:
+          type: string
+          description: Путь запроса, где произошла ошибка
+          example: "/api/bands"
+
+  responses:
+    BadRequest:
+      description: Некорректный запрос - нарушены ограничения целостности данных
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "BAD_REQUEST"
+            message: "Значение поля name должно быть больше 0"
+            timestamp: "2024-01-15T10:30:00Z"
+            path: "/api/bands"
+
+    NotFound:
+      description: Ресурс не найден
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "NOT_FOUND"
+            message: "Группа с ID 999 не найдена"
+            timestamp: "2024-01-15T10:30:00Z"
+            path: "/api/bands"
+            
+    InternalServerError:
+      description: Внутренняя ошибка сервера
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "INTERNAL_SERVER_ERROR"
+            message: "Произошла внутренняя ошибка сервера"
+            timestamp: "2024-01-15T10:30:00Z"
+            path: "/api/bands"
+
+tags:
+  - name: MusicBands
+    description: Операции для управления коллекцией музыкальных групп
+  - name: Grammy
+    description: Дополнительные операции с музыкальными группами
