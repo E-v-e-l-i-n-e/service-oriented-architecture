@@ -1,0 +1,110 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.modal {
+    background: #16213e;
+    border-radius: 16px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 500px;
+    border: 1px solid #00ff88;
+    box-shadow: 0 10px 30px rgba(0, 255, 136, 0.2);
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    color: #ff6bcb;
+    cursor: pointer;
+}
+
+.title {
+    margin: 0 0 1.5rem;
+    font-size: 1.6rem;
+    color: #c84bff;
+    text-align: center;
+}
+
+.form {
+    display: flex;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+}
+
+.input {
+    flex: 1;
+    padding: 0.9rem;
+    border: 2px solid #5dade2;
+    border-radius: 8px;
+    background: rgba(15, 52, 96, 0.6);
+    color: white;
+    font-size: 1rem;
+}
+
+.input:focus {
+    border-color: #00ff88;
+    outline: none;
+}
+
+.submit {
+    background: linear-gradient(135deg, #00ff2f, #00cc33);
+    color: white;
+    border: none;
+    padding: 0 1.2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.error {
+    color: #ff6b6b;
+    font-size: 0.9rem;
+    margin: 0.5rem 0 0;
+    text-align: center;
+}
+
+.card {
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px dashed #00ff88;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.bandName {
+    margin: 0 0 1rem;
+    font-size: 1.5rem;
+    color: #00ff88;
+    text-align: center;
+    font-weight: 600;
+}
+
+.info p {
+    margin: 0.5rem 0;
+    color: #e0e0e0;
+    font-size: 0.95rem;
+}
+
+.info strong {
+    color: #c84bff;
+}
