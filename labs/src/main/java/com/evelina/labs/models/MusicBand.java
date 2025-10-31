@@ -3,6 +3,7 @@ package com.evelina.labs.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,6 +27,7 @@ public class MusicBand {
     private String name; //Поле не может быть null, Строка не может быть пустой
 
     @Embedded
+    @NotNull
     private Coordinates coordinates; //Поле не может быть null
 
     @Column(nullable = false, updatable = false)
@@ -37,10 +39,10 @@ public class MusicBand {
     private Long numberOfParticipants; //Поле не может быть null, Значение поля должно быть больше 0
 
     @Min(value = 1)
-    private long singlesCount; //Значение поля должно быть больше 0
+    private Long singlesCount; //Значение поля должно быть больше 0
 
     @Min(value = 1)
-    private int albumsCount; //Значение поля должно быть больше 0
+    private Integer albumsCount; //Значение поля должно быть больше 0
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
