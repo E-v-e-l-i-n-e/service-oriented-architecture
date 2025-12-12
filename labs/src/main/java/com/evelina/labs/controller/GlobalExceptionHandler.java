@@ -150,7 +150,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleInternalServerError(Exception ex) {
         ErrorResponse error = new ErrorResponse(
                 "INTERNAL_SERVER_ERROR", null,
-                "Произошла непредвиденная ошибка сервера",
+                "Произошла непредвиденная ошибка сервера 2",
                 ZonedDateTime.now().toString(),
                 "/bands"
         );

@@ -1,5 +1,4 @@
-DROP TRIGGER IF EXISTS music_band_limit_trigger ON music_band;
-DROP FUNCTION IF EXISTS music_band_limit_trigger_func();
+
 
 INSERT INTO music_band (name, x, y, creation_date, number_of_participants, singles_count, albums_count, genre, sales) VALUES ( 'Pink Floyd', -481, 884324, '2020-05-08 00:00:00', 3, 46, 10, 'PROGRESSIVE_ROCK', 8642297);
 INSERT INTO music_band (name, x, y, creation_date, number_of_participants, singles_count, albums_count, genre, sales) VALUES ( 'Yes', 602, 870140, '2020-02-11 00:00:00', 5, 14, 24, 'PROGRESSIVE_ROCK', 5008878);
@@ -52,26 +51,3 @@ INSERT INTO music_band (name, x, y, creation_date, number_of_participants, singl
 INSERT INTO music_band (name, x, y, creation_date, number_of_participants, singles_count, albums_count, genre, sales) VALUES ( 'AFI', -25, -67102, '2024-05-06 00:00:00', 6, 23, 2, 'PUNK_ROCK', 9712101);
 INSERT INTO music_band (name, x, y, creation_date, number_of_participants, singles_count, albums_count, genre, sales) VALUES ( 'Steven Wilson', 784, -230519, '2024-09-23 00:00:00', 8, 65, 4, 'PROGRESSIVE_ROCK', 9489166);
 
--- Функция триггера
-CREATE OR REPLACE FUNCTION music_band_limit_trigger_func()
-    RETURNS TRIGGER AS $$
-BEGIN
-    -- Если после вставки записей станет 101
-    IF (SELECT COUNT(*) FROM music_band) = 101 THEN
-        -- Удаляем запись с самым ранним creation_date
-        DELETE FROM music_band
-        WHERE ctid = (
-            SELECT ctid FROM music_band
-            ORDER BY creation_date ASC
-            LIMIT 1
-        );
-    END IF;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- Создание триггера BEFORE INSERT
-CREATE TRIGGER music_band_limit_trigger
-    BEFORE INSERT ON music_band
-    FOR EACH ROW
-EXECUTE FUNCTION music_band_limit_trigger_func();
